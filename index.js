@@ -1,11 +1,10 @@
-// This new function is the key to keeping the bot alive 24/7
+// This is the new line that imports our keep-alive code
 const keepAlive = require('./keep_alive');
 
 require('dotenv').config();
 const { Client } = require('discord.js-selfbot-v13');
 const DISBOARD_BOT_ID = '302050872383242240';
 
-// --- Configuration from Secrets ---
 const USER_TOKEN = process.env.USER_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
@@ -15,11 +14,11 @@ const client = new Client({
 
 client.on('ready', async () => {
     console.log(`--- Logged in as user: ${client.user.tag} ---`);
-    console.log('--- WARNING: Self-botting is against Discord ToS and can get your account banned. ---');
     bumpingTask(); 
 });
 
 async function bumpingTask() {
+    // ... (The rest of your bumping code remains exactly the same)
     console.log('Starting bumping cycle...');
     try {
         const channel = await client.channels.fetch(CHANNEL_ID);
@@ -41,10 +40,9 @@ async function bumpingTask() {
     }
 }
 
-// This line starts the web server
+// This is the new line that starts the web server
 keepAlive();
 
-// This line logs the bot in
 client.login(USER_TOKEN).catch(err => {
     console.error("FATAL ERROR: Failed to login. Is your USER_TOKEN correct in the Secrets?");
     console.error(err.message);
