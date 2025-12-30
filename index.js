@@ -1,16 +1,17 @@
 const keepAlive = require('./keep_alive');
 require('dotenv').config();
 const { Client } = require('discord.js-selfbot-v13');
+const { ProxyAgent } = require('proxy-agent');
 
 const DISBOARD_BOT_ID = '302050872383242240';
 const USER_TOKEN = process.env.USER_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
+const PROXY_URL = process.env.PROXY_URL; // We will set this in Render later
 
-// --- STEALTH CONFIGURATION ---
-// This tricks Discord into thinking we are a real Windows PC
-const client = new Client({
+// Define the client options
+const clientOptions = {
     checkUpdate: false,
-    patchVoice: true, 
+    patchVoice: true,
     ws: {
         properties: {
             os: 'Windows',
@@ -24,7 +25,19 @@ const client = new Client({
             distro: 'unknown'
         }
     }
-});
+};
+
+// If a proxy is provided in secrets, apply it
+if (PROXY_URL) {
+    console.log(`🌐 Using Proxy: ${PROXY_URL}`);
+    const agent = new ProxyAgent(PROXY_URL);
+    clientOptions.http = { agent: agent };
+    clientOptions.ws.agent = agent;
+} else {
+    console.log('⚠️ No Proxy URL found. Attempting direct connection...');
+}
+
+const client = new Client(clientOptions);
 
 client.on('ready', async () => {
     console.log(`✅ SUCCESS: Logged in as ${client.user.tag}`);
@@ -32,7 +45,6 @@ client.on('ready', async () => {
 });
 
 client.on('debug', (info) => {
-    // Log connection progress to help us debug
     if(info.includes('Session') || info.includes('token') || info.includes('Login') || info.includes('Gateway')) {
         console.log(`[DEBUG]: ${info}`);
     }
@@ -62,4 +74,6 @@ async function bumpingTask() {
 }
 
 keepAlive();
-client.login(USER_TOKEN);
+client.login(USER_TOKEN).catch(err => {
+    console.error("❌ LOGIN FAILED:", err);
+});
