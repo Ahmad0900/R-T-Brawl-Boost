@@ -2,7 +2,6 @@
   "dependencies": {
     "discord.js-selfbot-v13": "^3.4.5",
     "dotenv": "^16.4.5",
-    "debug": "^4.3.4",
     "proxy-agent": "^6.3.0"
   }
 }
