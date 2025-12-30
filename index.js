@@ -1,49 +1,58 @@
-// This is the new line that imports our keep-alive code
 const keepAlive = require('./keep_alive');
-
 require('dotenv').config();
-const { Client } = require('discord.js-selfbot-v13');
+const { Client } = require('selfbot.js');
+
 const DISBOARD_BOT_ID = '302050872383242240';
 
+// --- Configuration from Secrets ---
 const USER_TOKEN = process.env.USER_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
-const client = new Client({
-    checkUpdate: false,
-});
+// Create the client with the new library
+const client = new Client();
 
-client.on('ready', async () => {
-    console.log(`--- Logged in as user: ${client.user.tag} ---`);
-    bumpingTask(); 
+client.on('ready', async (user) => {
+    console.log(`--- Logged in successfully as user: ${user.tag} ---`);
+    console.log('--- WARNING: Self-botting is against Discord ToS and can get your account banned. ---');
+    
+    // Start the main bumping loop
+    bumpingTask();
 });
 
 async function bumpingTask() {
-    // ... (The rest of your bumping code remains exactly the same)
     console.log('Starting bumping cycle...');
     try {
-        const channel = await client.channels.fetch(CHANNEL_ID);
+        const channel = await client.channels.cache.get(CHANNEL_ID);
         if (!channel) {
             console.error(`FATAL ERROR: Could not find channel with ID ${CHANNEL_ID}.`);
             return;
         }
-        await channel.sendSlash(DISBOARD_BOT_ID, 'bump');
-        console.log(`Successfully sent /bump command to #${channel.name}.`);
+
+        // The new library has a built-in function to interact with slash commands
+        const interaction = await client.createCommandInteraction(channel, DISBOARD_BOT_ID, "bump");
+        if (interaction.success) {
+            console.log(`Successfully sent /bump command to #${channel.name}.`);
+        } else {
+            console.error(`Failed to send bump command. Reason: ${interaction.message}`);
+        }
 
     } catch (error) {
-        console.error('An error occurred during bump:', error.message);
+        console.error('An error occurred during bump:', error);
     } finally {
+        // Calculate the random wait time
         const randomDelay = Math.floor(Math.random() * (900 - 300 + 1)) + 300;
         const totalWait = 7200 + randomDelay;
         const minutes = (totalWait / 60).toFixed(2);
+
         console.log(`Next bump in ${minutes} minutes. Sleeping...`);
+        
+        // Wait for the calculated time and then run the function again
         setTimeout(bumpingTask, totalWait * 1000);
     }
 }
 
-// This is the new line that starts the web server
+// Start the keep-alive server
 keepAlive();
 
-client.login(USER_TOKEN).catch(err => {
-    console.error("FATAL ERROR: Failed to login. Is your USER_TOKEN correct in the Secrets?");
-    console.error(err.message);
-});
+// Login using the new library's method
+client.login(USER_TOKEN);
