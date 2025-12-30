@@ -1,6 +1,6 @@
 const keepAlive = require('./keep_alive');
 require('dotenv').config();
-const { Client } = require('selfbot.js');
+const { Client } = require('discord.js-self');
 
 const DISBOARD_BOT_ID = '302050872383242240';
 
@@ -8,11 +8,10 @@ const DISBOARD_BOT_ID = '302050872383242240';
 const USER_TOKEN = process.env.USER_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
-// Create the client with the new library
 const client = new Client();
 
-client.on('ready', async (user) => {
-    console.log(`--- Logged in successfully as user: ${user.tag} ---`);
+client.on('ready', async () => {
+    console.log(`--- Logged in successfully as user: ${client.user.tag} ---`);
     console.log('--- WARNING: Self-botting is against Discord ToS and can get your account banned. ---');
     
     // Start the main bumping loop
@@ -28,12 +27,19 @@ async function bumpingTask() {
             return;
         }
 
-        // The new library has a built-in function to interact with slash commands
-        const interaction = await client.createCommandInteraction(channel, DISBOARD_BOT_ID, "bump");
-        if (interaction.success) {
+        // This new method is more reliable: it finds the command ID first
+        const commands = await channel.guild.commands.fetch();
+        const bumpCommand = commands.find(cmd => cmd.name === 'bump' && cmd.applicationId === DISBOARD_BOT_ID);
+
+        if (bumpCommand) {
+            // Now we execute the command using its found ID
+            await client.managers.interactions.run(bumpCommand.id, {
+                channel: channel,
+                guild: channel.guild
+            });
             console.log(`Successfully sent /bump command to #${channel.name}.`);
         } else {
-            console.error(`Failed to send bump command. Reason: ${interaction.message}`);
+             console.error(`ERROR: Could not find the /bump slash command for Disboard in this server.`);
         }
 
     } catch (error) {
@@ -54,5 +60,5 @@ async function bumpingTask() {
 // Start the keep-alive server
 keepAlive();
 
-// Login using the new library's method
+// Login using the token
 client.login(USER_TOKEN);
