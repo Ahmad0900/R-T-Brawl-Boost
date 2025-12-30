@@ -6,30 +6,36 @@ const DISBOARD_BOT_ID = '302050872383242240';
 const USER_TOKEN = process.env.USER_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 
-// Configure the client to be stealthy and fast
+// --- STEALTH CONFIGURATION ---
+// This tricks Discord into thinking we are a real Windows PC
 const client = new Client({
     checkUpdate: false,
-    patchVoice: true, // often helps with login stability
-    syncStatus: false
+    patchVoice: true, 
+    ws: {
+        properties: {
+            os: 'Windows',
+            browser: 'Discord Client',
+            release_channel: 'stable',
+            client_version: '1.0.9010',
+            os_version: '10.0.22621',
+            os_arch: 'x64',
+            system_locale: 'en-US',
+            window_manager: 'unknown',
+            distro: 'unknown'
+        }
+    }
 });
 
-// 1. LISTEN FOR SUCCESS
 client.on('ready', async () => {
     console.log(`✅ SUCCESS: Logged in as ${client.user.tag}`);
     bumpingTask(); 
 });
 
-// 2. LISTEN FOR DEEP DEBUG LOGS (This fixes the silence)
 client.on('debug', (info) => {
-    // Only print important connection info, ignore the noise
-    if(info.includes('Session') || info.includes('token') || info.includes('Login')) {
+    // Log connection progress to help us debug
+    if(info.includes('Session') || info.includes('token') || info.includes('Login') || info.includes('Gateway')) {
         console.log(`[DEBUG]: ${info}`);
     }
-});
-
-// 3. LISTEN FOR RAW ERRORS
-client.on('error', (error) => {
-    console.error('❌ CLIENT ERROR:', error);
 });
 
 async function bumpingTask() {
@@ -41,15 +47,11 @@ async function bumpingTask() {
             return;
         }
 
-        // Use the library's built-in Slash Command spoofer
         await channel.sendSlash(DISBOARD_BOT_ID, 'bump');
         console.log(`✅ SENT: /bump command to #${channel.name}`);
 
     } catch (error) {
         console.error('⚠️ ERROR during bump:', error.message);
-        if(error.message.includes("could not find")) {
-             console.error("   -> Hint: Is Disboard actually in this channel?");
-        }
     } finally {
         const randomDelay = Math.floor(Math.random() * (900 - 300 + 1)) + 300;
         const totalWait = 7200 + randomDelay;
@@ -60,8 +62,4 @@ async function bumpingTask() {
 }
 
 keepAlive();
-
-console.log("🚀 Attempting to log in...");
-client.login(USER_TOKEN).catch(err => {
-    console.error("❌ LOGIN FAILED HARD:", err);
-});
+client.login(USER_TOKEN);
