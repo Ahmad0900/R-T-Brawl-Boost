@@ -2,9 +2,20 @@ name: Auto Bump Bot
 
 on:
   schedule:
-    # Runs at minute 0 past every 2nd hour (0, 2, 4, 6... UTC)
-    - cron: '0 */2 * * *'
-  # Allows you to click a button to test it manually
+    # 2 Hours and 10 Minutes Interval Schedule
+    # Run 1 & 7:  00:00, 13:00
+    - cron: '0 0,13 * * *'
+    # Run 2 & 8:  02:10, 15:10
+    - cron: '10 2,15 * * *'
+    # Run 3 & 9:  04:20, 17:20
+    - cron: '20 4,17 * * *'
+    # Run 4 & 10: 06:30, 19:30
+    - cron: '30 6,19 * * *'
+    # Run 5 & 11: 08:40, 21:40
+    - cron: '40 8,21 * * *'
+    # Run 6 & 12: 10:50, 23:50
+    - cron: '50 10,23 * * *'
+    
   workflow_dispatch:
 
 jobs:
