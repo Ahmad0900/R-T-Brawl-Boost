@@ -10,7 +10,6 @@ const PROXY_URL = process.env.PROXY_URL;
 // --- DELAY CONFIGURATION (SAFE LIMIT) ---
 // Min: 1 Minute (60,000 ms)
 // Max: 7 Minutes (420,000 ms)
-// Average run cost: 5 minutes. Total monthly usage: ~1800/2000 minutes.
 const MIN_DELAY = 60000; 
 const MAX_DELAY = 420000; 
 
