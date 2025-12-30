@@ -1,7 +1,6 @@
 {
   "dependencies": {
-    "discord.js-selfbot-v13": "^3.1.4",
-    "dotenv": "^16.4.5",
-    "debug": "^4.3.4"
+    "selfbot.js": "^1.2.5",
+    "dotenv": "^16.4.5"
   }
 }
