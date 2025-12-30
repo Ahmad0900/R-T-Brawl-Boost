@@ -7,17 +7,20 @@ const USER_TOKEN = process.env.USER_TOKEN;
 const CHANNEL_ID = process.env.CHANNEL_ID;
 const PROXY_URL = process.env.PROXY_URL;
 
-// --- RANDOM DELAY LOGIC (1 to 15 Minutes) ---
-// 1 minute = 60,000 ms
-// 15 minutes = 900,000 ms
+// --- DELAY CONFIGURATION (SAFE LIMIT) ---
+// Min: 1 Minute (60,000 ms)
+// Max: 7 Minutes (420,000 ms)
+// Average run cost: 5 minutes. Total monthly usage: ~1800/2000 minutes.
 const MIN_DELAY = 60000; 
-const MAX_DELAY = 900000; 
+const MAX_DELAY = 420000; 
 
-// Calculate a random time to wait
+// Calculate random wait
 const randomWaitTime = Math.floor(Math.random() * (MAX_DELAY - MIN_DELAY + 1)) + MIN_DELAY;
 const waitInMinutes = (randomWaitTime / 60000).toFixed(2);
 
-console.log(`⏳ GitHub Action started. Waiting ${waitInMinutes} minutes before bumping to simulate human behavior...`);
+console.log(`⏳ GitHub Action started.`);
+console.log(`⏱️ Calculated Delay: ${waitInMinutes} minutes.`);
+console.log(`...Waiting...`);
 
 // Wait first, THEN run the bot
 setTimeout(() => {
@@ -25,7 +28,7 @@ setTimeout(() => {
 }, randomWaitTime);
 
 function startBot() {
-    console.log("🚀 Starting Bot Process now...");
+    console.log("🚀 Timer finished. Starting Bot Process now...");
     
     const clientOptions = {
         checkUpdate: false,
@@ -45,7 +48,6 @@ function startBot() {
         }
     };
 
-    // Add Proxy if it exists
     if (PROXY_URL) {
         console.log(`🌐 Connecting via Proxy...`);
         const agent = new ProxyAgent(PROXY_URL);
@@ -69,7 +71,6 @@ function startBot() {
             await channel.sendSlash(DISBOARD_BOT_ID, 'bump');
             console.log(`✅ SUCCESS: Bump sent!`);
             
-            // Wait 10 seconds to ensure the command goes through, then shut down
             setTimeout(() => {
                 console.log("👋 Job finished. Exiting.");
                 process.exit(0);
